@@ -1,6 +1,6 @@
 /* reading patches */
 
-/* Copyright 1990-2024 Free Software Foundation, Inc.
+/* Copyright 1990-2025 Free Software Foundation, Inc.
    Copyright 1986-1988 Larry Wall
 
    This program is free software: you can redistribute it and/or modify
@@ -1765,9 +1765,10 @@ another_hunk (enum diff difftype, bool rev)
 	if (*s == ',') {
 	    idx_t last;
 	    s = scan_linenum (s + 1, &last);
-	    if (p_first >= IDX_MAX - p_ptrn_lines)
+	    ptrdiff_t diff = last - p_first;
+	    if (! (-1 <= diff && diff < IDX_MAX))
 	      malformed ();
-	    p_ptrn_lines += 1 - p_first;
+	    p_ptrn_lines = diff + 1;
 	}
 	else
 	    p_ptrn_lines = (*s != 'a');

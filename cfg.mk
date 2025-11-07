@@ -1,5 +1,5 @@
 # Customize maint.mk                           -*- makefile -*-
-# Copyright 2011-2024 Free Software Foundation, Inc.
+# Copyright 2011-2025 Free Software Foundation, Inc.
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@ config_h_header = <(common|config)\.h>
 
 ifeq ($(RELEASE_TYPE),alpha)
   news-check-regexp = "Unreleased changes"
+else
+  news-check-regexp = '^Changes in version $(VERSION_REGEXP):'
 endif
 
 release-prep-hook =

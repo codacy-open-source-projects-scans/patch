@@ -1,4 +1,4 @@
-# Copyright 2009-2024 Free Software Foundation, Inc.
+# Copyright 2009-2025 Free Software Foundation, Inc.
 #
 # Copying and distribution of this file, with or without modification,
 # in any medium, are permitted without royalty provided the copyright
@@ -9,6 +9,7 @@
 . $srcdir/test-lib.sh
 
 require cat
+require chmod
 use_local_patch
 use_tmpdir
 
@@ -65,4 +66,9 @@ chmod a=r f
 check 'patch -f -p0 --read-only=ignore < f.diff || echo "Status: $?"' <<EOF
 patching file f
 patching file f
+EOF
+
+check 'patch -o - f /dev/null || echo "Status: $?"' <<EOF
+patching file - (read from f)
+three
 EOF

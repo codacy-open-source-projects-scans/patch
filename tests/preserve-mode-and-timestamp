@@ -1,4 +1,4 @@
-# Copyright 2009-2024 Free Software Foundation, Inc.
+# Copyright 2009-2025 Free Software Foundation, Inc.
 #
 # Copying and distribution of this file, with or without modification,
 # in any medium, are permitted without royalty provided the copyright
@@ -6,8 +6,12 @@
 
 . $srcdir/test-lib.sh
 
+# Note: This test fails on Haiku. This is normal; it is caused by
+# Haiku bug <https://dev.haiku-os.org/ticket/19213>.
+
 require cat
 require sed
+require chmod
 use_local_patch
 use_tmpdir
 

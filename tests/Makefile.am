@@ -1,4 +1,4 @@
-# Copyright 1989-2024 Free Software Foundation, Inc.
+# Copyright 1989-2025 Free Software Foundation, Inc.
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ TESTS = \
 	git-cleanup \
 	garbage \
 	global-reject-files \
+	hardlinks \
 	inname \
 	line-numbers \
 	merge \
@@ -49,12 +50,14 @@ TESTS = \
 	mixed-patch-types \
 	munged-context-format \
 	need-filename \
+	no-backup \
 	no-mode-change-git-diff \
 	no-newline-triggers-assert \
 	preserve-c-function-names \
 	preserve-mode-and-timestamp \
 	quoted-filenames \
 	read-only-files \
+	regression-abe92e8010ab \
 	reject-format \
 	remember-backup-files \
 	remember-reject-files \
@@ -66,6 +69,10 @@ TESTS = \
 XFAIL_TESTS = \
 	dash-o-append \
 	context-format
+if OS_IS_HAIKU
+XFAIL_TESTS += \
+	preserve-mode-and-timestamp
+endif
 
 EXTRA_DIST = \
 	$(TESTS) \

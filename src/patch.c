@@ -1,6 +1,6 @@
 /* patch - a program to apply diffs to original files */
 
-/* Copyright 1989-2024 Free Software Foundation, Inc.
+/* Copyright 1989-2025 Free Software Foundation, Inc.
    Copyright 1984-1988 Larry Wall
 
    This program is free software: you can redistribute it and/or modify
@@ -118,6 +118,7 @@ static bool merge;
 static enum diff reject_format = NO_DIFF;  /* automatic */
 static bool make_backups;
 static bool backup_if_mismatch;
+static bool backup_if_mismatch_specified;
 static char const *version_control;
 static char const *version_control_context;
 static bool remove_empty_files;
@@ -175,7 +176,6 @@ main (int argc, char **argv)
     }
 
     posixly_correct = getenv ("POSIXLY_CORRECT") != 0;
-    backup_if_mismatch = ! posixly_correct;
     patch_get = ((val = getenv ("PATCH_GET"))
 		 ? numeric_string (val, true, "PATCH_GET value")
 		 : 0);
@@ -197,12 +197,17 @@ main (int argc, char **argv)
     if (set_utc && setenv ("TZ", "UTC0", 1) < 0)
       pfatal ("setenv");
 
+    if (!backup_if_mismatch_specified)
+      backup_if_mismatch = !posixly_correct;
     if (make_backups | backup_if_mismatch)
       backup_type = get_version (version_control_context, version_control);
 
     init_output (&outstate);
     if (outfile)
-      outstate.ofp = open_outfile (outfile);
+      {
+        outstate.ofp = open_outfile (outfile);
+        read_only_behavior = RO_IGNORE;
+      }
 
     /* Make sure we clean up in case of disaster.  */
     init_signals ();
@@ -277,11 +282,7 @@ main (int argc, char **argv)
 	  else if (pch_copy () || pch_rename ())
 	    outname = pch_name (! reverse_flag);
 	  else
-	    {
-	      if (strchr (inname, '\n'))
-		fatal ("input/output file name contains newline");
-	      outname = inname;
-	    }
+	    outname = inname;
 	}
 
       if (pch_git_diff () && ! skip_rest_of_patch)
@@ -295,7 +296,7 @@ main (int argc, char **argv)
 
 	  if (! strcmp (inname, outname))
 	    {
-	      if (inerrno < 0)
+	      if (inerrno == -1)
 		inerrno = stat_file (inname, &instat);
 	      outstat = instat;
 	      outerrno = inerrno;
@@ -325,7 +326,8 @@ main (int argc, char **argv)
 	    }
 	}
 
-      if (read_only_behavior != RO_IGNORE
+      if (! skip_rest_of_patch
+	  && read_only_behavior != RO_IGNORE
 	  && ! inerrno && ! S_ISLNK (instat.st_mode)
 	  && safe_access (inname, W_OK) != 0)
 	{
@@ -618,7 +620,7 @@ main (int argc, char **argv)
 		      struct stat outstat;
 
 		      if (stat_file (outname, &outstat) != 0)
-			say ("Cannot stat file %s, skipping backup\n", outname);
+			say ("Cannot stat file %s, skipping backup\n", quotearg (outname));
 		      else
 			output_file (&(struct outfile) { .name = outname },
 				     &outstat, nullptr, nullptr,
@@ -904,8 +906,6 @@ backup_file_name_option (char const *option_type)
 {
   if (!*optarg)
     fatal ("backup %s is empty", option_type);
-  if (strchr (optarg, '\n'))
-    fatal ("backup %s contains newline", option_type);
   return xstrdup (optarg);
 }
 
@@ -992,8 +992,6 @@ get_some_switches (int argc, char **argv)
 		noreverse_flag = true;
 		break;
 	    case 'o':
-		if (strchr (optarg, '\n'))
-		  fatal ("output file name contains newline");
 		outfile = xstrdup (optarg);
 		break;
 	    case 'p':
@@ -1058,9 +1056,11 @@ get_some_switches (int argc, char **argv)
 		usage (stdout, EXIT_SUCCESS);
 	    case CHAR_MAX + 5:
 		backup_if_mismatch = true;
+		backup_if_mismatch_specified = true;
 		break;
 	    case CHAR_MAX + 6:
 		backup_if_mismatch = false;
+		backup_if_mismatch_specified = true;
 		break;
 	    case CHAR_MAX + 7:
 		posixly_correct = true;

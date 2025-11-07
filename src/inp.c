@@ -1,6 +1,6 @@
 /* inputting files to be patched */
 
-/* Copyright 1991-2024 Free Software Foundation, Inc.
+/* Copyright 1991-2025 Free Software Foundation, Inc.
    Copyright 1986, 1988 Larry Wall
 
    This program is free software: you can redistribute it and/or modify
@@ -85,7 +85,7 @@ get_input_file (char *filename, char const *outname, mode_t file_type)
     char *diffbuf;
     char *getbuf;
 
-    if (inerrno < 0)
+    if (inerrno == -1)
       inerrno = stat_file (filename, &instat);
 
     /* Perhaps look for RCS or SCCS versions.  */
