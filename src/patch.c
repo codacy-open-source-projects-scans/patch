@@ -1,6 +1,6 @@
 /* patch - a program to apply diffs to original files */
 
-/* Copyright 1989-2025 Free Software Foundation, Inc.
+/* Copyright 1989-2026 Free Software Foundation, Inc.
    Copyright 1984-1988 Larry Wall
 
    This program is free software: you can redistribute it and/or modify
@@ -1169,9 +1169,6 @@ locate_hunk (idx_t fuzz)
     ptrdiff_t max_neg_offset = first_guess - min_where;
     ptrdiff_t max_offset = MAX (max_pos_offset, max_neg_offset);
     ptrdiff_t min_offset;
-
-    if (!pat_lines)			/* null range matches always */
-	return first_guess;
 
     /* Do not try lines <= 0.  */
     if (first_guess <= max_neg_offset)

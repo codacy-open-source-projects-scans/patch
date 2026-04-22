@@ -1,6 +1,6 @@
 /* reading patches */
 
-/* Copyright 1990-2025 Free Software Foundation, Inc.
+/* Copyright 1990-2026 Free Software Foundation, Inc.
    Copyright 1986-1988 Larry Wall
 
    This program is free software: you can redistribute it and/or modify
@@ -1694,7 +1694,8 @@ another_hunk (enum diff difftype, bool rev)
 		    p_end = filldst-1;
 		    malformed ();
 		}
-		chars_read -= fillsrc == p_ptrn_lines && incomplete_line ();
+		chars_read -= (1 < chars_read && fillsrc == p_ptrn_lines
+			       && incomplete_line ());
 		p_Char[fillsrc] = ch;
 		p_line[fillsrc] = s;
 		p_len[fillsrc++] = chars_read;
@@ -1711,7 +1712,8 @@ another_hunk (enum diff difftype, bool rev)
 		    malformed ();
 		}
 		context++;
-		chars_read -= fillsrc == p_ptrn_lines && incomplete_line ();
+		chars_read -= (1 < chars_read && fillsrc == p_ptrn_lines
+			       && incomplete_line ());
 		p_Char[fillsrc] = ch;
 		p_line[fillsrc] = s;
 		p_len[fillsrc++] = chars_read;
@@ -1725,7 +1727,8 @@ another_hunk (enum diff difftype, bool rev)
 		    p_end = fillsrc-1;
 		    malformed ();
 		}
-		chars_read -= filldst == p_end && incomplete_line ();
+		chars_read -= (1 < chars_read && filldst == p_end
+			       && incomplete_line ());
 		p_Char[filldst] = ch;
 		p_line[filldst] = s;
 		p_len[filldst++] = chars_read;
@@ -1808,7 +1811,8 @@ another_hunk (enum diff difftype, bool rev)
 	      fatal (("'<' followed by space or tab expected"
 		      " at line %td of patch"),
 		     p_input_line);
-	    chars_read -= 2 + (i == p_ptrn_lines && incomplete_line ());
+	    chars_read -= 2 + (3 < chars_read && i == p_ptrn_lines
+			       && incomplete_line ());
 	    p_len[i] = chars_read;
 	    p_line[i] = savebuf (patchbuf + 2, chars_read);
 	    p_Char[i] = '-';
@@ -1833,7 +1837,8 @@ another_hunk (enum diff difftype, bool rev)
 	      fatal (("'>' followed by space or tab expected"
 		      " at line %td of patch"),
 		     p_input_line);
-	    chars_read -= 2 + (i == p_end && incomplete_line ());
+	    chars_read -= 2 + (3 < chars_read && i == p_end
+			       && incomplete_line ());
 	    p_len[i] = chars_read;
 	    p_line[i] = savebuf (patchbuf + 2, chars_read);
 	    p_Char[i] = '+';
@@ -2376,9 +2381,9 @@ do_ed_script (char *input_name, struct outfile *output, FILE *ofp)
       pfatal ("Failed to duplicate standard input");
     assert (output_name[0] != '!' && output_name[0] != '-');
     idx_t output_namelen = quote_system_arg (nullptr, output_name);
-    char *command = ximalloc (sizeof (EDITOR_PROGRAM " - ") + output_namelen);
+    char *command = ximalloc (sizeof (EDITOR_PROGRAM " -s ") + output_namelen);
     char *p = command;
-    p = stpcpy (p, EDITOR_PROGRAM " - ");
+    p = stpcpy (p, EDITOR_PROGRAM " -s ");
     p += quote_system_arg (p, output_name);
     *p = '\0';
     int status = systemic (command);
